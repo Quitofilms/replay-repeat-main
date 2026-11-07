@@ -235,6 +235,10 @@ export class Replay extends Component<Signature> {
     this.now = seconds;
   }
 
+  seekFromControl = (event: Event) => {
+    this.seek(Number((event.currentTarget as HTMLInputElement).value));
+  };
+
   back = (seconds: number) => {
     const floor = this.looping ? this.loopStart : 0;
 
@@ -732,6 +736,19 @@ export class Replay extends Component<Signature> {
                 </span>
               {{/if}}
             </div>
+
+            <input
+              class="replay__seek"
+              type="range"
+              min="0"
+              max={{this.duration}}
+              step="0.1"
+              value={{this.now}}
+              aria-label="Seek video"
+              aria-valuetext={{formatTime this.now}}
+              data-test-seek
+              {{on "input" this.seekFromControl}}
+            />
 
             <RangeSlider
               class="replay__markers"

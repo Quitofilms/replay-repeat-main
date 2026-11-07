@@ -214,6 +214,14 @@ body:has(.replay[data-theatre]) {
   }
 }
 
+.replay__seek {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--color-primary);
+  touch-action: pan-y;
+}
+
 .replay__status {
   display: flex;
   flex-wrap: wrap;
