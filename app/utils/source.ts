@@ -1,4 +1,4 @@
-export type Source = { kind: "file"; file: File } | { kind: "youtube"; id: string } | { kind: "drive"; id: string };
+export type Source = { kind: "file"; file: File } | { kind: "youtube"; id: string } | { kind: "drive"; id: string; downloadUrl?: string };
 
 /**
  * A browser takes the type of a file from the operating system,

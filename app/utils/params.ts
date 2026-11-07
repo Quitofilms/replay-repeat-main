@@ -10,6 +10,7 @@ import type { QueryParams } from "#services/url-state.ts";
 export const PARAMS = {
   youtube: "youtube_video_id",
   drive: "drive_file_id",
+  driveDownload: "drive_download_url",
   title: "saved_title",
   note: "saved_note",
   loopStart: "loop_start",
@@ -27,6 +28,7 @@ export const NEW_VIDEO: QueryParams = {
   [PARAMS.loopEnd]: null,
   [PARAMS.loop]: null,
   [PARAMS.drive]: null,
+  [PARAMS.driveDownload]: null,
   [PARAMS.title]: null,
   [PARAMS.note]: null,
 };

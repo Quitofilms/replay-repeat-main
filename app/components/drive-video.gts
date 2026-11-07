@@ -4,11 +4,11 @@ import { waitForPromise } from '@ember/test-waiters';
 
 import { modifier } from 'ember-modifier';
 
-import { driveMediaUrl } from '#utils/drive.ts';
+import { driveViewUrl } from '#utils/drive.ts';
 import { FilePlayer, type Player } from '#utils/player.ts';
 
 interface Signature {
-  Args: { id: string; onReady: (player: Player) => void };
+  Args: { id: string; downloadUrl?: string; onReady: (player: Player) => void };
 }
 
 export class DriveVideo extends Component<Signature> {
@@ -30,9 +30,12 @@ export class DriveVideo extends Component<Signature> {
 
   <template>
     {{#if this.error}}
-      <p class='replay__error' role='alert'>{{this.error}}</p>
+      <div class='replay__error' role='alert'>
+        <p>{{this.error}}</p>
+        <a href={{driveViewUrl @id}} target='_blank' rel='noreferrer'>Open this video in Google Drive</a>
+      </div>
     {{else}}
-      <video class='replay__media' src={{driveMediaUrl @id}} playsinline preload='metadata' aria-label='Shared Drive video' {{this.attach}}></video>
+      <video class='replay__media' src={{@downloadUrl}} playsinline preload='metadata' aria-label='Shared Drive video' {{this.attach}}></video>
     {{/if}}
   </template>
 }

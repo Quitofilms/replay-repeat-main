@@ -8,6 +8,7 @@ import { modifier } from "ember-modifier";
 import { castToBoolean } from "ember-primitives/qp";
 import { Button, RangeSlider, ToggleButton } from "nvp.ui";
 
+import { driveMediaUrl, isDriveDownloadUrl } from "#utils/drive.ts";
 import { History } from "#utils/history.ts";
 import { formatSeconds, PARAMS, secondsOf } from "#utils/params.ts";
 import { formatTime } from "#utils/time.ts";
@@ -201,6 +202,13 @@ export class Replay extends Component<Signature> {
 
   get driveId() {
     return this.args.source.kind === "drive" ? this.args.source.id : undefined;
+  }
+
+  get driveDownloadUrl() {
+    if (this.args.source.kind !== "drive") return undefined;
+    return isDriveDownloadUrl(this.args.source.downloadUrl)
+      ? this.args.source.downloadUrl
+      : driveMediaUrl(this.args.source.id);
   }
 
   get loopStart() {
@@ -678,7 +686,11 @@ export class Replay extends Component<Signature> {
           {{else if this.youTubeId}}
             <YouTubeVideo @id={{this.youTubeId}} @onReady={{this.ready}} />
           {{else if this.driveId}}
-            <DriveVideo @id={{this.driveId}} @onReady={{this.ready}} />
+            <DriveVideo
+              @id={{this.driveId}}
+              @downloadUrl={{this.driveDownloadUrl}}
+              @onReady={{this.ready}}
+            />
           {{/if}}
 
           {{#if this.player}}

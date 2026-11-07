@@ -15,6 +15,7 @@ import { Welcome } from "#components/welcome.gts";
 import { NEW_VIDEO, PARAMS } from "#utils/params.ts";
 import { fileSource, isMedia } from "#utils/source.ts";
 import { youTubeIdOf } from "#utils/youtube.ts";
+import { isDriveDownloadUrl } from "#utils/drive.ts";
 
 import type UrlStateService from "#services/url-state.ts";
 import type { Source } from "#utils/source.ts";
@@ -49,7 +50,12 @@ export default class Application extends Component {
     const driveId = this.urlState.param(PARAMS.drive);
 
     if (driveId && /^[\w-]+$/.test(driveId)) {
-      const source: Source = { kind: "drive", id: driveId };
+      const downloadUrl = this.urlState.param(PARAMS.driveDownload);
+      const source: Source = {
+        kind: "drive",
+        id: driveId,
+        downloadUrl: isDriveDownloadUrl(downloadUrl) ? downloadUrl : undefined,
+      };
 
       return [{ key: `drive:${driveId}`, source }];
     }
@@ -85,11 +91,12 @@ export default class Application extends Component {
     this.urlState.update({ ...NEW_VIDEO, [PARAMS.youtube]: null, [PARAMS.drive]: null });
   };
 
-  uploaded = (id: string, title: string, note: string) => {
+  uploaded = (id: string, title: string, note: string, downloadUrl: string) => {
     this.file = undefined;
     this.urlState.update({
       [PARAMS.youtube]: null,
       [PARAMS.drive]: id,
+      [PARAMS.driveDownload]: downloadUrl,
       [PARAMS.title]: title,
       [PARAMS.note]: note || null,
     });

@@ -21,7 +21,7 @@ interface Signature {
     url: string;
     title?: string;
     note?: string;
-    onUploaded: (id: string, title: string, note: string) => void;
+    onUploaded: (id: string, title: string, note: string, downloadUrl: string) => void;
   };
 }
 
@@ -33,13 +33,20 @@ function initialTitle(source: Source): string {
   return source.id;
 }
 
-function replayUrl(current: string, title: string, note: string, driveId?: string): string {
+function replayUrl(
+  current: string,
+  title: string,
+  note: string,
+  driveId?: string,
+  downloadUrl?: string,
+): string {
   const url = new URL(current);
   url.searchParams.delete('saved_title');
   url.searchParams.delete('saved_note');
   if (driveId) {
     url.searchParams.delete('youtube_video_id');
     url.searchParams.set('drive_file_id', driveId);
+    if (downloadUrl) url.searchParams.set('drive_download_url', downloadUrl);
   }
   url.searchParams.set('saved_title', title.trim());
   if (note.trim()) url.searchParams.set('saved_note', note.trim());
@@ -103,13 +110,13 @@ export class SavedReplays extends Component<Signature> {
     this.busy = true;
     this.error = undefined;
     try {
-      const driveId = await uploadToDrive(file, title, this.note);
+      const { id: driveId, downloadUrl } = await uploadToDrive(file, title, this.note);
       const item: SavedReplay = {
         id: crypto.randomUUID(), title, note: this.note.trim(),
-        url: replayUrl(this.args.url, title, this.note, driveId), savedAt: new Date().toISOString(),
+        url: replayUrl(this.args.url, title, this.note, driveId, downloadUrl), savedAt: new Date().toISOString(),
       };
       this.add(item);
-      this.args.onUploaded(driveId, title, this.note.trim());
+      this.args.onUploaded(driveId, title, this.note.trim(), downloadUrl);
     } catch (error) {
       this.error = error instanceof Error ? error.message : String(error);
     } finally {

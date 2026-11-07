@@ -78,12 +78,16 @@ async function apiError(response: Response): Promise<Error> {
 }
 
 /** Uploads a local video and grants read access to anyone with its link. */
-export async function uploadToDrive(file: File, title: string, note: string): Promise<string> {
+export async function uploadToDrive(
+  file: File,
+  title: string,
+  note: string,
+): Promise<{ id: string; downloadUrl: string }> {
   const token = await accessToken();
   const extension = file.name.includes('.') ? `.${file.name.split('.').pop()}` : '';
   const name = `${title.trim() || file.name.replace(/\.[^.]+$/, '')}${extension}`;
   const mimeType = file.type || 'application/octet-stream';
-  const start = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id', {
+  const start = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,webContentLink', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -103,8 +107,10 @@ export async function uploadToDrive(file: File, title: string, note: string): Pr
     body: file,
   });
   if (!uploaded.ok) throw await apiError(uploaded);
-  const result = await uploaded.json() as { id?: string };
-  if (!result.id) throw new Error('Google Drive uploaded the video but did not return its file ID.');
+  const result = await uploaded.json() as { id?: string; webContentLink?: string };
+  if (!result.id || !result.webContentLink) {
+    throw new Error("Google Drive uploaded the video but did not return its browser download link.");
+  }
 
   const permission = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(result.id)}/permissions`, {
     method: 'POST',
@@ -121,7 +127,21 @@ export async function uploadToDrive(file: File, title: string, note: string): Pr
     throw new Error(`The upload finished, but Drive could not enable link sharing: ${error.message}`);
   }
 
-  return result.id;
+  return { id: result.id, downloadUrl: result.webContentLink };
+}
+
+export function isDriveDownloadUrl(value: string | undefined): value is string {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && ["drive.google.com", "drive.usercontent.google.com"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+export function driveViewUrl(id: string): string {
+  return `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`;
 }
 
 export function driveMediaUrl(id: string): string {

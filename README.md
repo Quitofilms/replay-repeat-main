@@ -31,6 +31,7 @@ For example: `/?youtube_video_id=dQw4w9WgXcQ&loop_start=30&loop_end=35.5&loop=1&
 | :----------------- | :------------------------------------ |
 | `youtube_video_id` | the id of a YouTube video             |
 | `drive_file_id`    | the id of an uploaded Drive video     |
+| `drive_download_url` | the Drive browser download URL      |
 | `saved_title`      | the saved replay title                |
 | `saved_note`       | the optional note shared with the replay |
 | `loop_start`       | seconds, default `0`                  |
