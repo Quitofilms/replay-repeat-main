@@ -658,3 +658,98 @@ kbd {
     animation: none;
   }
 }
+
+.handout__intro,
+.handout__empty {
+  margin: 0;
+}
+
+.handout__library {
+  display: grid;
+  gap: var(--gap-3);
+  padding: var(--padding-3);
+  border: var(--border-width) var(--border-style) color-mix(in oklab, var(--color-text) 25%, transparent);
+  border-radius: var(--radius);
+}
+
+.handout__library-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-2);
+}
+
+.handout__library-heading h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.handout__library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-2);
+}
+
+.handout__save-form {
+  display: grid;
+  gap: var(--gap-2);
+  max-width: 40rem;
+  padding-block: var(--padding-2);
+}
+
+.handout__save-form label,
+.handout__filter label {
+  display: grid;
+  gap: var(--gap);
+}
+
+.handout__save-form input,
+.handout__save-form textarea,
+.handout__filter select {
+  padding: var(--padding-1) var(--padding-2);
+  color: inherit;
+  font: inherit;
+  background: var(--color-page-background);
+  border: var(--border-width) var(--border-style) color-mix(in oklab, var(--color-text) 35%, transparent);
+  border-radius: var(--radius);
+}
+
+.handout__filter {
+  display: flex;
+  justify-content: end;
+}
+
+.handout__import,
+.handout__choose-file {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap);
+  cursor: pointer;
+}
+
+.handout__import input,
+.handout__choose-file input {
+  max-width: 13rem;
+}
+
+.handout__kind {
+  margin-inline-start: var(--gap-2);
+  color: color-mix(in oklab, var(--color-text) 65%, transparent);
+  font-size: 0.85rem;
+}
+
+.handout__status {
+  min-height: 1.4em;
+  margin: 0;
+  color: color-mix(in oklab, var(--color-text) 75%, transparent);
+  font-size: 0.9rem;
+}
+
+.handout__library small {
+  display: block;
+  margin-block-start: var(--gap);
+  color: color-mix(in oklab, var(--color-text) 70%, transparent);
+}

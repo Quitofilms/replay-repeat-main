@@ -11,6 +11,7 @@ import { ThemeToggle } from "nvp.ui/theme-toggle";
 import { Replay } from "#components/replay.gts";
 import { SavedReplays } from "#components/saved-replays.gts";
 import { SourcePicker } from "#components/source-picker.gts";
+import { HandoutPage } from "#components/handout-page.gts";
 import { Welcome } from "#components/welcome.gts";
 import { NEW_VIDEO, PARAMS } from "#utils/params.ts";
 import { fileSource, isMedia } from "#utils/source.ts";
@@ -63,6 +64,10 @@ export default class Application extends Component {
     if (this.file) return [this.file];
 
     return [];
+  }
+
+  get handoutMode() {
+    return import.meta.env.VITE_HANDOUT === "true";
   }
 
   get buildVersion() {
@@ -133,58 +138,62 @@ export default class Application extends Component {
   };
 
   <template>
-    <Shell>
-      <DocumentFileDrop @onFiles={{this.loadFiles}} as |page|>
-        {{#if page.isDragging}}
-          <div class="page-drop" data-test-page-drop>Drop to load the video</div>
-        {{/if}}
-      </DocumentFileDrop>
-
-      <div class="layout">
-        <header class="layout__header">
-          <div class="layout__title">
-            <h1>Replay, repeat</h1>
-            <span class="layout__build" title="Increasing GitHub Actions deployment number">
-              Version {{this.buildVersion}}
-            </span>
-          </div>
-          <div class="layout__header-end">
-            <ExternalLink href="https://github.com/NullVoxPopuli/replay-repeat" data-test-github>
-              GitHub
-            </ExternalLink>
-            <ThemeToggle />
-          </div>
-        </header>
-
-        <main>
-          <SourcePicker @onSource={{this.load}} />
-
-          {{#if this.dropError}}
-            <p class="replay__error" role="alert" data-test-drop-error>{{this.dropError}}</p>
+    {{#if this.handoutMode}}
+      <HandoutPage @buildVersion={{this.buildVersion}} />
+    {{else}}
+      <Shell>
+        <DocumentFileDrop @onFiles={{this.loadFiles}} as |page|>
+          {{#if page.isDragging}}
+            <div class="page-drop" data-test-page-drop>Drop to load the video</div>
           {{/if}}
+        </DocumentFileDrop>
 
-          {{! A new key starts a new replay, with a fresh undo history. }}
-          {{#each this.sources key="key" as |item|}}
-            <SavedReplays
-              @source={{item.source}}
-              @url={{this.currentURL}}
-              @title={{this.savedTitle}}
-              @note={{this.savedNote}}
-              @onUploaded={{this.uploaded}}
-            />
-            <Replay @source={{item.source}} @onUseLocal={{this.useDriveLocal}} />
-          {{else}}
-            <SavedReplays
-              @source={{undefined}}
-              @url={{this.currentURL}}
-              @title={{this.savedTitle}}
-              @note={{this.savedNote}}
-              @onUploaded={{this.uploaded}}
-            />
-            <Welcome />
-          {{/each}}
-        </main>
-      </div>
-    </Shell>
+        <div class="layout">
+          <header class="layout__header">
+            <div class="layout__title">
+              <h1>Replay, repeat</h1>
+              <span class="layout__build" title="Increasing GitHub Actions deployment number">
+                Version {{this.buildVersion}}
+              </span>
+            </div>
+            <div class="layout__header-end">
+              <ExternalLink href="https://github.com/NullVoxPopuli/replay-repeat" data-test-github>
+                GitHub
+              </ExternalLink>
+              <ThemeToggle />
+            </div>
+          </header>
+
+          <main>
+            <SourcePicker @onSource={{this.load}} />
+
+            {{#if this.dropError}}
+              <p class="replay__error" role="alert" data-test-drop-error>{{this.dropError}}</p>
+            {{/if}}
+
+            {{! A new key starts a new replay, with a fresh undo history. }}
+            {{#each this.sources key="key" as |item|}}
+              <SavedReplays
+                @source={{item.source}}
+                @url={{this.currentURL}}
+                @title={{this.savedTitle}}
+                @note={{this.savedNote}}
+                @onUploaded={{this.uploaded}}
+              />
+              <Replay @source={{item.source}} @onUseLocal={{this.useDriveLocal}} />
+            {{else}}
+              <SavedReplays
+                @source={{undefined}}
+                @url={{this.currentURL}}
+                @title={{this.savedTitle}}
+                @note={{this.savedNote}}
+                @onUploaded={{this.uploaded}}
+              />
+              <Welcome />
+            {{/each}}
+          </main>
+        </div>
+        </Shell>
+    {{/if}}
   </template>
 }

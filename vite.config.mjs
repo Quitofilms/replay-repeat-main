@@ -16,7 +16,16 @@ const emberIcon = {
   },
 };
 
+const handoutBuild = process.env.VITE_HANDOUT === "true";
+
 export default defineConfig({
   base: process.env.VITE_BASE_PATH ?? "/",
   plugins: [ember(), Icons({ compiler: emberIcon })],
+  build: {
+    outDir: "dist",
+    emptyOutDir: !handoutBuild,
+    rollupOptions: {
+      input: handoutBuild ? "handout/index.html" : "index.html",
+    },
+  },
 });
