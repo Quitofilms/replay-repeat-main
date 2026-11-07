@@ -3,7 +3,6 @@
  */
 export interface Player {
   readonly currentTime: number;
-  readonly title?: string;
   readonly duration: number;
   readonly paused: boolean;
   readonly ended: boolean;
@@ -97,10 +96,6 @@ export class YouTubePlayer implements Player {
 
   constructor(player: YT.Player) {
     this.#player = player;
-  }
-
-  get title() {
-    return this.#player.getVideoData().title;
   }
 
   get currentTime() {
