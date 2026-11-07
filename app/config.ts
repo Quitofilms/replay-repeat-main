@@ -8,7 +8,7 @@ interface Config {
 
 const ENV: Config = {
   environment: import.meta.env.DEV ? "development" : "production",
-  rootURL: "/",
+  rootURL: import.meta.env.BASE_URL,
   locationType: "history",
   EmberENV: {},
   APP: {},

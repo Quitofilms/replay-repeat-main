@@ -2,3 +2,7 @@ node_modules/
 dist/
 .eslintcache
 *.tgz
+
+.env.local
+
+client_secret_*.json

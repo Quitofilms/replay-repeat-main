@@ -9,6 +9,7 @@ import { ExternalLink, Shell } from "nvp.ui";
 import { ThemeToggle } from "nvp.ui/theme-toggle";
 
 import { Replay } from "#components/replay.gts";
+import { SavedReplays } from "#components/saved-replays.gts";
 import { SourcePicker } from "#components/source-picker.gts";
 import { Welcome } from "#components/welcome.gts";
 import { NEW_VIDEO, PARAMS } from "#utils/params.ts";
@@ -33,7 +34,7 @@ export default class Application extends Component {
   @tracked dropError: string | undefined;
 
   /**
-   * A YouTube video in the URL wins over a file.
+   * A YouTube video in the URL wins over a Drive link or a local file.
    */
   get sources() {
     const param = this.urlState.param(PARAMS.youtube);
@@ -45,9 +46,29 @@ export default class Application extends Component {
       return [{ key: `youtube:${id}`, source }];
     }
 
+    const driveId = this.urlState.param(PARAMS.drive);
+
+    if (driveId && /^[\w-]+$/.test(driveId)) {
+      const source: Source = { kind: "drive", id: driveId };
+
+      return [{ key: `drive:${driveId}`, source }];
+    }
+
     if (this.file) return [this.file];
 
     return [];
+  }
+
+  get currentURL() {
+    return window.location.href;
+  }
+
+  get savedTitle() {
+    return this.urlState.param(PARAMS.title);
+  }
+
+  get savedNote() {
+    return this.urlState.param(PARAMS.note);
   }
 
   load = (source: Source) => {
@@ -55,13 +76,23 @@ export default class Application extends Component {
 
     if (source.kind === "youtube") {
       this.file = undefined;
-      this.urlState.update({ ...NEW_VIDEO, [PARAMS.youtube]: source.id });
+      this.urlState.update({ ...NEW_VIDEO, [PARAMS.youtube]: source.id, [PARAMS.drive]: null });
 
       return;
     }
 
     this.file = { key: crypto.randomUUID(), source };
-    this.urlState.update({ ...NEW_VIDEO, [PARAMS.youtube]: null });
+    this.urlState.update({ ...NEW_VIDEO, [PARAMS.youtube]: null, [PARAMS.drive]: null });
+  };
+
+  uploaded = (id: string, title: string, note: string) => {
+    this.file = undefined;
+    this.urlState.update({
+      [PARAMS.youtube]: null,
+      [PARAMS.drive]: id,
+      [PARAMS.title]: title,
+      [PARAMS.note]: note || null,
+    });
   };
 
   /**
@@ -109,6 +140,13 @@ export default class Application extends Component {
 
           {{! A new key starts a new replay, with a fresh undo history. }}
           {{#each this.sources key="key" as |item|}}
+            <SavedReplays
+              @source={{item.source}}
+              @url={{this.currentURL}}
+              @title={{this.savedTitle}}
+              @note={{this.savedNote}}
+              @onUploaded={{this.uploaded}}
+            />
             <Replay @source={{item.source}} />
           {{else}}
             <Welcome />

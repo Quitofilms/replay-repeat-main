@@ -30,12 +30,15 @@ For example: `/?youtube_video_id=dQw4w9WgXcQ&loop_start=30&loop_end=35.5&loop=1&
 | param              | value                                 |
 | :----------------- | :------------------------------------ |
 | `youtube_video_id` | the id of a YouTube video             |
+| `drive_file_id`    | the id of an uploaded Drive video     |
+| `saved_title`      | the saved replay title                |
+| `saved_note`       | the optional note shared with the replay |
 | `loop_start`       | seconds, default `0`                  |
 | `loop_end`         | seconds, default the end of the video |
 | `loop`             | `1` when the loop is on               |
 | `speed`            | `0.25` to `2`, default `1`            |
 
-A file from your disk cannot be in a link, so a file uses only the last four.
+A local file cannot be included in a replay link. Upload it to Drive to add its file ID, title, and optional note to a shareable replay URL.
 
 There is no server:
 
@@ -94,3 +97,10 @@ This project uses TypeScript 7 and [ember-content-mapper](https://github.com/Nul
 - `pnpm lint:types` - Typecheck code with TypeScript
 - Imports of `.gts` and `.gjs` modules must include the extension
 - Editor setup: see [ember-content-mapper's editors section](https://github.com/NullVoxPopuli/ember-content-mapper#editors)
+
+### Saved replays and Google Drive
+
+Saved replay titles, notes, and links are stored in this browser. Local video files must be uploaded before they can be shared. The uploader uses Google Identity Services and the Drive API; configure a Google OAuth web client ID as `VITE_GOOGLE_CLIENT_ID` in an ignored `.env.local` file. Enable the Google Drive API and add the app's origin (for example `http://localhost:5173`) to the OAuth client's authorized JavaScript origins. The app requests the `drive.file` scope, uploads the selected video, and grants reader access to anyone with that file's link. That makes the uploaded video public to people who have its link.
+### GitHub Pages deployment
+
+This fork's deployment workflow publishes the site at `https://quitofilms.github.io/replay-repeat-main/` when changes reach `main`. In the repository, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**. Add a repository Actions variable named `VITE_GOOGLE_CLIENT_ID` with the web client ID; the deploy workflow injects it at build time. In Google OAuth, authorize the origin `https://quitofilms.github.io` (the origin excludes the repository path).

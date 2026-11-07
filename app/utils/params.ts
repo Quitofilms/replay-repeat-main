@@ -4,11 +4,14 @@ import type { QueryParams } from "#services/url-state.ts";
  * The query params that hold the state of the app,
  * so a link opens the same video with the same loop and speed.
  *
- * A file from disk cannot be in a URL,
- * so a file source uses only the params after `youtube_video_id`.
+ * A file from disk cannot be in a URL. An uploaded Drive file uses its ID,
+ * and saved replay links may also include a title and note.
  */
 export const PARAMS = {
   youtube: "youtube_video_id",
+  drive: "drive_file_id",
+  title: "saved_title",
+  note: "saved_note",
   loopStart: "loop_start",
   loopEnd: "loop_end",
   loop: "loop",
@@ -16,13 +19,16 @@ export const PARAMS = {
 } as const;
 
 /**
- * A new video clears its loop and markers: they belong to the old video.
+ * A new video clears its loop, saved title, note, and Drive source.
  * The speed stays, because it is about the person, not the video.
  */
 export const NEW_VIDEO: QueryParams = {
   [PARAMS.loopStart]: null,
   [PARAMS.loopEnd]: null,
   [PARAMS.loop]: null,
+  [PARAMS.drive]: null,
+  [PARAMS.title]: null,
+  [PARAMS.note]: null,
 };
 
 /**

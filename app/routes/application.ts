@@ -12,6 +12,9 @@ import { PARAMS } from "#utils/params.ts";
 export default class ApplicationRoute extends Route {
   queryParams = {
     [PARAMS.youtube]: { refreshModel: false },
+    [PARAMS.drive]: { refreshModel: false },
+    [PARAMS.title]: { refreshModel: false },
+    [PARAMS.note]: { refreshModel: false },
     [PARAMS.loopStart]: { refreshModel: false },
     [PARAMS.loopEnd]: { refreshModel: false },
     [PARAMS.loop]: { refreshModel: false },

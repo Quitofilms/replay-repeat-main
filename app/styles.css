@@ -54,6 +54,40 @@ main {
   }
 }
 
+.saved {
+  display: grid;
+  gap: var(--gap-3);
+  padding: var(--padding-3);
+  border: var(--border-width) var(--border-style) color-mix(in oklab, var(--color-text) 25%, transparent);
+  border-radius: var(--radius);
+
+  summary { cursor: pointer; font-weight: 600; }
+}
+
+.saved__form {
+  display: grid;
+  gap: var(--gap-2);
+  max-width: 40rem;
+  margin-block-start: var(--gap-3);
+
+  input, textarea {
+    padding: var(--padding-1) var(--padding-2);
+    font: inherit;
+    color: inherit;
+    background: var(--color-page-background);
+    border: var(--border-width) var(--border-style) color-mix(in oklab, var(--color-text) 35%, transparent);
+    border-radius: var(--radius);
+  }
+}
+
+.saved__optional, .saved__hint { color: color-mix(in oklab, var(--color-text) 70%, transparent); font-size: 0.9rem; }
+.saved__hint { margin: 0; }
+.saved__list { display: grid; gap: var(--gap-2); }
+.saved__list h2 { margin: 0; font-size: 1rem; }
+.saved__item { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-2); padding-block: var(--padding-2); border-top: 1px solid color-mix(in oklab, var(--color-text) 18%, transparent); }
+.saved__item > div { flex: 1 1 16rem; }
+.saved__item p { margin: var(--gap) 0 0; color: color-mix(in oklab, var(--color-text) 75%, transparent); white-space: pre-wrap; }
+
 .replay__error {
   /* --color-danger alone is too light for text in both themes */
   color: color-mix(in oklab, var(--color-danger) 65%, var(--color-text));

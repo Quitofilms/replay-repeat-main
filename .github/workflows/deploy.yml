@@ -1,7 +1,6 @@
 name: Deploy
 
-# Publishes the build to GitHub Pages, at https://replay-repeat.nullvoxpopuli.com.
-# The custom domain is set in the repository's Pages settings.
+# Builds and publishes this repository to GitHub Pages.
 
 on:
   push:
@@ -26,6 +25,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: wyvox/action-setup-pnpm@v3
       - run: pnpm build
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_BASE_PATH: /replay-repeat-main/
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

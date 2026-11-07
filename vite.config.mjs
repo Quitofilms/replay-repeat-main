@@ -17,5 +17,6 @@ const emberIcon = {
 };
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH ?? "/",
   plugins: [ember(), Icons({ compiler: emberIcon })],
 });

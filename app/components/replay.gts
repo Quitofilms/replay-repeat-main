@@ -24,6 +24,7 @@ import Undo from "~icons/mdi/undo";
 import VolumeHigh from "~icons/mdi/volume-high";
 import VolumeOff from "~icons/mdi/volume-off";
 
+import { DriveVideo } from "./drive-video.gts";
 import { Shortcuts } from "./shortcuts.gts";
 import { VideoFile } from "./video-file.gts";
 import { YouTubeVideo } from "./video-youtube.gts";
@@ -196,6 +197,10 @@ export class Replay extends Component<Signature> {
 
   get youTubeId() {
     return this.args.source.kind === "youtube" ? this.args.source.id : undefined;
+  }
+
+  get driveId() {
+    return this.args.source.kind === "drive" ? this.args.source.id : undefined;
   }
 
   get loopStart() {
@@ -672,6 +677,8 @@ export class Replay extends Component<Signature> {
             <VideoFile @file={{this.file}} @onReady={{this.ready}} />
           {{else if this.youTubeId}}
             <YouTubeVideo @id={{this.youTubeId}} @onReady={{this.ready}} />
+          {{else if this.driveId}}
+            <DriveVideo @id={{this.driveId}} @onReady={{this.ready}} />
           {{/if}}
 
           {{#if this.player}}
