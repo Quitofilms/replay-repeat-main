@@ -55,7 +55,7 @@ function replayUrl(
 }
 
 export class SavedReplays extends Component<Signature> {
-  @tracked title: string;
+  @tracked titleOverride: string | undefined;
   @tracked note: string;
   @tracked items: SavedReplay[] = [];
   @tracked busy = false;
@@ -76,12 +76,16 @@ export class SavedReplays extends Component<Signature> {
     prepareDrive();
   }
 
+  get title() {
+    return this.titleOverride ?? this.args.title ?? initialTitle(this.args.source);
+  }
+
   get localFile() {
     return this.args.source?.kind === 'file' ? this.args.source.file : undefined;
   }
 
   updateTitle = (event: Event) => {
-    this.title = (event.currentTarget as HTMLInputElement).value;
+    this.titleOverride = (event.currentTarget as HTMLInputElement).value;
   };
 
   updateNote = (event: Event) => {

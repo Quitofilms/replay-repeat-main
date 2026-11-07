@@ -33,6 +33,7 @@ export default class Application extends Component {
    * Why the last drop did not load, so that a drop never fails without a word.
    */
   @tracked dropError: string | undefined;
+  @tracked youtubeTitle: string | undefined;
 
   /**
    * A YouTube video in the URL wins over a Drive link or a local file.
@@ -70,7 +71,7 @@ export default class Application extends Component {
   }
 
   get savedTitle() {
-    return this.urlState.param(PARAMS.title);
+    return this.urlState.param(PARAMS.title) || this.youtubeTitle;
   }
 
   get savedNote() {
@@ -79,6 +80,7 @@ export default class Application extends Component {
 
   load = (source: Source) => {
     this.dropError = undefined;
+    this.youtubeTitle = undefined;
 
     if (source.kind === "youtube") {
       this.file = undefined;
@@ -91,7 +93,12 @@ export default class Application extends Component {
     this.urlState.update({ ...NEW_VIDEO, [PARAMS.youtube]: null, [PARAMS.drive]: null });
   };
 
+  setYoutubeTitle = (title: string) => {
+    if (title.trim()) this.youtubeTitle = title.trim();
+  };
+
   useDriveLocal = (file: File) => {
+    this.youtubeTitle = undefined;
     this.file = { key: crypto.randomUUID(), source: { kind: "file", file } };
     this.urlState.update({
       [PARAMS.youtube]: null,
@@ -101,6 +108,7 @@ export default class Application extends Component {
   };
 
   uploaded = (id: string, title: string, note: string, downloadUrl: string) => {
+    this.youtubeTitle = undefined;
     this.file = undefined;
     this.urlState.update({
       [PARAMS.youtube]: null,
@@ -163,7 +171,7 @@ export default class Application extends Component {
               @note={{this.savedNote}}
               @onUploaded={{this.uploaded}}
             />
-            <Replay @source={{item.source}} @onUseLocal={{this.useDriveLocal}} />
+            <Replay @source={{item.source}} @onUseLocal={{this.useDriveLocal}} @onTitle={{this.setYoutubeTitle}} />
           {{else}}
             <SavedReplays
               @source={{undefined}}

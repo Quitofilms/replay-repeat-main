@@ -38,6 +38,7 @@ interface Signature {
   Args: {
     source: Source;
     onUseLocal: (file: File) => void;
+    onTitle?: (title: string) => void;
   };
 }
 
@@ -222,6 +223,7 @@ export class Replay extends Component<Signature> {
 
   ready = (player: Player) => {
     this.player = player;
+    if (player.title) this.args.onTitle?.(player.title);
     this.duration = player.duration;
     this.volume = player.volume;
     this.muted = player.muted;
