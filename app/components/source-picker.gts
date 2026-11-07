@@ -57,6 +57,7 @@ export class SourcePicker extends Component<Signature> {
               type="text"
               inputmode="url"
               autocomplete="off"
+              value="https://www.youtube.com/watch?v=7mRioRDKnAQ"
               placeholder="https://www.youtube.com/watch?v=…"
               required
               aria-invalid={{if this.linkError "true"}}

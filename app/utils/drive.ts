@@ -1,6 +1,7 @@
 /** Google Drive upload and link sharing for local media. */
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRIVE_FOLDER_ID = '1EU8JNBXAVdUC5G0FenwMF2EBy-LRgoFv';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
 
 type TokenResponse = { access_token?: string; error?: string; error_description?: string };
 type DriveIdentity = {
@@ -95,7 +96,12 @@ export async function uploadToDrive(
       'X-Upload-Content-Type': mimeType,
       'X-Upload-Content-Length': String(file.size),
     },
-    body: JSON.stringify({ name, mimeType, description: note.trim() }),
+    body: JSON.stringify({
+      name,
+      mimeType,
+      description: note.trim(),
+      parents: [DRIVE_FOLDER_ID],
+    }),
   });
   if (!start.ok) throw await apiError(start);
   const session = start.headers.get('Location');
