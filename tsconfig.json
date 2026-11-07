@@ -1,0 +1,22 @@
+{
+  "extends": "@ember/app-tsconfig",
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "types": [
+      "ember-source/types",
+      "@embroider/core/virtual",
+      "vite/client",
+      "@glint/ember-tsc/types",
+      "youtube",
+      "unplugin-icons/types/ember"
+    ]
+  },
+  "exclude": ["dist", "node_modules"],
+  "contentMappers": [
+    {
+      "package": "ember-content-mapper",
+      "extensions": [".gts", ".gjs"]
+    }
+  ]
+}
