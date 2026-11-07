@@ -66,7 +66,7 @@ export default class Application extends Component {
   }
 
   get buildVersion() {
-    return String(import.meta.env.VITE_BUILD_VERSION || "local").slice(0, 7);
+    return String(import.meta.env.VITE_BUILD_NUMBER || "local");
   }
 
   get currentURL() {
@@ -144,8 +144,8 @@ export default class Application extends Component {
         <header class="layout__header">
           <div class="layout__title">
             <h1>Replay, repeat</h1>
-            <span class="layout__build" title="Commit used to create this build">
-              Build {{this.buildVersion}}
+            <span class="layout__build" title="Increasing GitHub Actions deployment number">
+              Version {{this.buildVersion}}
             </span>
           </div>
           <div class="layout__header-end">
