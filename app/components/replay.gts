@@ -37,6 +37,7 @@ import type { Source } from "#utils/source.ts";
 interface Signature {
   Args: {
     source: Source;
+    onUseLocal: (file: File) => void;
   };
 }
 
@@ -689,6 +690,7 @@ export class Replay extends Component<Signature> {
             <DriveVideo
               @id={{this.driveId}}
               @downloadUrl={{this.driveDownloadUrl}}
+              @onUseLocal={{@onUseLocal}}
               @onReady={{this.ready}}
             />
           {{/if}}

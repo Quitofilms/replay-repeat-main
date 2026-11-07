@@ -91,6 +91,15 @@ export default class Application extends Component {
     this.urlState.update({ ...NEW_VIDEO, [PARAMS.youtube]: null, [PARAMS.drive]: null });
   };
 
+  useDriveLocal = (file: File) => {
+    this.file = { key: crypto.randomUUID(), source: { kind: "file", file } };
+    this.urlState.update({
+      [PARAMS.youtube]: null,
+      [PARAMS.drive]: null,
+      [PARAMS.driveDownload]: null,
+    });
+  };
+
   uploaded = (id: string, title: string, note: string, downloadUrl: string) => {
     this.file = undefined;
     this.urlState.update({
@@ -154,7 +163,7 @@ export default class Application extends Component {
               @note={{this.savedNote}}
               @onUploaded={{this.uploaded}}
             />
-            <Replay @source={{item.source}} />
+            <Replay @source={{item.source}} @onUseLocal={{this.useDriveLocal}} />
           {{else}}
             <Welcome />
           {{/each}}
