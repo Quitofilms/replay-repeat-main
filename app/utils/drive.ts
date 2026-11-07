@@ -83,7 +83,7 @@ export async function uploadToDrive(
   file: File,
   title: string,
   note: string,
-): Promise<{ id: string; downloadUrl: string }> {
+): Promise<{ id: string; downloadUrl: string; token: string }> {
   const token = await accessToken();
   const extension = file.name.includes('.') ? `.${file.name.split('.').pop()}` : '';
   const name = `${title.trim() || file.name.replace(/\.[^.]+$/, '')}${extension}`;
@@ -133,7 +133,7 @@ export async function uploadToDrive(
     throw new Error(`The upload finished, but Drive could not enable link sharing: ${error.message}`);
   }
 
-  return { id: result.id, downloadUrl: result.webContentLink };
+  return { id: result.id, downloadUrl: result.webContentLink, token };
 }
 
 export function isDriveDownloadUrl(value: string | undefined): value is string {
@@ -152,4 +152,106 @@ export function driveViewUrl(id: string): string {
 
 export function driveMediaUrl(id: string): string {
   return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
+}
+
+export interface SharedSavedReplay {
+  id: string;
+  title: string;
+  note: string;
+  url: string;
+  savedAt: string;
+}
+
+const SAVED_LIST_NAME = 'replay-repeat-saved.json';
+
+async function savedListFileId(token: string): Promise<string | undefined> {
+  const query = new URLSearchParams({
+    q: `'${DRIVE_FOLDER_ID}' in parents and name = '${SAVED_LIST_NAME}' and trashed = false`,
+    fields: 'files(id)',
+    pageSize: '1',
+    spaces: 'drive',
+  });
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files?${query}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw await apiError(response);
+  const result = await response.json() as { files?: Array<{ id?: string }> };
+  return result.files?.[0]?.id;
+}
+
+export async function saveSharedSavedReplays(
+  items: SharedSavedReplay[],
+  existingToken?: string,
+): Promise<SharedSavedReplay[]> {
+  const token = existingToken ?? await accessToken();
+  const id = await savedListFileId(token);
+  let previous: SharedSavedReplay[] = [];
+
+  if (id) {
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw await apiError(response);
+    const content = await response.json() as unknown;
+    if (!Array.isArray(content)) throw new Error('The shared saved list in Drive is not a valid list.');
+    previous = content as SharedSavedReplay[];
+  }
+
+  const merged = new Map<string, SharedSavedReplay>();
+  for (const item of previous) merged.set(item.id, item);
+  for (const item of items) merged.set(item.id, item);
+  const saved = [...merged.values()].sort((a, b) => b.savedAt.localeCompare(a.savedAt));
+  const media = new Blob([JSON.stringify(saved, null, 2)], { type: 'application/json' });
+
+  if (id) {
+    const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(id)}?uploadType=media&fields=id`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: media,
+    });
+    if (!response.ok) throw await apiError(response);
+  } else {
+    const start = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json; charset=UTF-8',
+        'X-Upload-Content-Type': 'application/json',
+        'X-Upload-Content-Length': String(media.size),
+      },
+      body: JSON.stringify({ name: SAVED_LIST_NAME, mimeType: 'application/json', parents: [DRIVE_FOLDER_ID] }),
+    });
+    if (!start.ok) throw await apiError(start);
+    const session = start.headers.get('Location');
+    if (!session) throw new Error('Google Drive did not return an upload session for the saved list.');
+    const uploaded = await fetch(session, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: media,
+    });
+    if (!uploaded.ok) throw await apiError(uploaded);
+  }
+
+  return saved;
+}
+export async function removeSharedSavedReplay(idToRemove: string): Promise<SharedSavedReplay[]> {
+  const token = await accessToken();
+  const id = await savedListFileId(token);
+  if (!id) return [];
+
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw await apiError(response);
+  const content = await response.json() as unknown;
+  if (!Array.isArray(content)) throw new Error('The shared saved list in Drive is not a valid list.');
+  const saved = (content as SharedSavedReplay[]).filter((item) => item.id !== idToRemove);
+  const media = new Blob([JSON.stringify(saved, null, 2)], { type: 'application/json' });
+  const update = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(id)}?uploadType=media&fields=id`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: media,
+  });
+  if (!update.ok) throw await apiError(update);
+  return saved;
 }

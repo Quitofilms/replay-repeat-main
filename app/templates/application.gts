@@ -165,6 +165,13 @@ export default class Application extends Component {
             />
             <Replay @source={{item.source}} @onUseLocal={{this.useDriveLocal}} />
           {{else}}
+            <SavedReplays
+              @source={{undefined}}
+              @url={{this.currentURL}}
+              @title={{this.savedTitle}}
+              @note={{this.savedNote}}
+              @onUploaded={{this.uploaded}}
+            />
             <Welcome />
           {{/each}}
         </main>

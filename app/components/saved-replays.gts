@@ -3,7 +3,7 @@ import type Owner from '@ember/owner';
 import { tracked } from '@glimmer/tracking';
 import { on } from '@ember/modifier';
 
-import { prepareDrive, uploadToDrive } from '#utils/drive.ts';
+import { prepareDrive, removeSharedSavedReplay, saveSharedSavedReplays, uploadToDrive } from '#utils/drive.ts';
 
 import type { Source } from '#utils/source.ts';
 
@@ -17,7 +17,7 @@ interface SavedReplay {
 
 interface Signature {
   Args: {
-    source: Source;
+    source?: Source;
     url: string;
     title?: string;
     note?: string;
@@ -27,7 +27,8 @@ interface Signature {
 
 const STORAGE_KEY = 'replay-repeat:saved-videos:v1';
 
-function initialTitle(source: Source): string {
+function initialTitle(source?: Source): string {
+  if (!source) return '';
   if (source.kind === 'file') return source.file.name.replace(/\.[^.]+$/, '');
   if (source.kind === 'drive') return 'Saved video';
   return source.id;
@@ -58,6 +59,7 @@ export class SavedReplays extends Component<Signature> {
   @tracked note: string;
   @tracked items: SavedReplay[] = [];
   @tracked busy = false;
+  @tracked syncing = false;
   @tracked error: string | undefined;
   @tracked copied = false;
 
@@ -75,7 +77,7 @@ export class SavedReplays extends Component<Signature> {
   }
 
   get localFile() {
-    return this.args.source.kind === 'file' ? this.args.source.file : undefined;
+    return this.args.source?.kind === 'file' ? this.args.source.file : undefined;
   }
 
   updateTitle = (event: Event) => {
@@ -86,9 +88,13 @@ export class SavedReplays extends Component<Signature> {
     this.note = (event.currentTarget as HTMLTextAreaElement).value;
   };
 
-  save = (event: SubmitEvent) => {
+  save = async (event: SubmitEvent) => {
     event.preventDefault();
     const title = this.title.trim();
+    if (!this.args.source) {
+      this.error = 'Load a video before saving a replay.';
+      return;
+    }
     if (!title) {
       this.error = 'Add a title before saving.';
       return;
@@ -98,6 +104,7 @@ export class SavedReplays extends Component<Signature> {
       url: replayUrl(this.args.url, title, this.note), savedAt: new Date().toISOString(),
     };
     this.add(item);
+    await this.syncShared();
   };
 
   uploadAndSave = async () => {
@@ -110,17 +117,32 @@ export class SavedReplays extends Component<Signature> {
     this.busy = true;
     this.error = undefined;
     try {
-      const { id: driveId, downloadUrl } = await uploadToDrive(file, title, this.note);
+      const { id: driveId, downloadUrl, token } = await uploadToDrive(file, title, this.note);
       const item: SavedReplay = {
         id: crypto.randomUUID(), title, note: this.note.trim(),
         url: replayUrl(this.args.url, title, this.note, driveId, downloadUrl), savedAt: new Date().toISOString(),
       };
       this.add(item);
       this.args.onUploaded(driveId, title, this.note.trim(), downloadUrl);
+      this.items = await saveSharedSavedReplays(this.items, token);
+      this.persist();
     } catch (error) {
       this.error = error instanceof Error ? error.message : String(error);
     } finally {
       this.busy = false;
+    }
+  };
+
+  syncShared = async () => {
+    this.syncing = true;
+    this.error = undefined;
+    try {
+      this.items = await saveSharedSavedReplays(this.items);
+      this.persist();
+    } catch (error) {
+      this.error = `Saved on this device, but could not sync the shared list: ${error instanceof Error ? error.message : String(error)}`;
+    } finally {
+      this.syncing = false;
     }
   };
 
@@ -130,9 +152,14 @@ export class SavedReplays extends Component<Signature> {
     this.persist();
   }
 
-  remove = (id: string) => {
+  remove = async (id: string) => {
     this.items = this.items.filter((item) => item.id !== id);
     this.persist();
+    try {
+      await removeSharedSavedReplay(id);
+    } catch (error) {
+      this.error = `Removed on this device, but could not remove it from the shared list: ${error instanceof Error ? error.message : String(error)}`;
+    }
   };
 
   persist() {
@@ -155,8 +182,9 @@ export class SavedReplays extends Component<Signature> {
 
   <template>
     <section class='saved' aria-label='Saved replays' data-test-saved>
-      <details>
-        <summary>Save and share this replay</summary>
+      <details open={{not @source}}>
+        <summary>{{if @source 'Save and share this replay' 'Saved replays'}}</summary>
+        {{#if @source}}
         <form class='saved__form' {{on 'submit' this.save}}>
           <label class='source__field'>
             <span>Title</span>
@@ -174,8 +202,13 @@ export class SavedReplays extends Component<Signature> {
           {{else}}
             <button type='submit' data-test-save>Save replay</button>
           {{/if}}
-          {{#if this.error}}<p class='replay__error' role='alert'>{{this.error}}</p>{{/if}}
         </form>
+        {{/if}}
+        {{#if this.error}}<p class='replay__error' role='alert'>{{this.error}}</p>{{/if}}
+        <button type='button' disabled={{this.syncing}} {{on 'click' this.syncShared}} data-test-load-shared-list>
+          {{if this.syncing 'Loading shared list…' 'Load shared list'}}
+        </button>
+        <p class='saved__hint'>Shared replays are stored in the Repeat Replay Drive folder. Connect to Google on each device to load and merge the list.</p>
       </details>
 
       {{#if this.items.length}}
