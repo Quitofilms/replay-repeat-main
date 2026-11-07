@@ -28,6 +28,7 @@ jobs:
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
           VITE_BASE_PATH: /replay-repeat-main/
+          VITE_BUILD_VERSION: ${{ github.sha }}
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

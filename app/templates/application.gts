@@ -65,6 +65,10 @@ export default class Application extends Component {
     return [];
   }
 
+  get buildVersion() {
+    return String(import.meta.env.VITE_BUILD_VERSION || "local").slice(0, 7);
+  }
+
   get currentURL() {
     return window.location.href;
   }
@@ -138,7 +142,12 @@ export default class Application extends Component {
 
       <div class="layout">
         <header class="layout__header">
-          <h1>Replay, repeat</h1>
+          <div class="layout__title">
+            <h1>Replay, repeat</h1>
+            <span class="layout__build" title="Commit used to create this build">
+              Build {{this.buildVersion}}
+            </span>
+          </div>
           <div class="layout__header-end">
             <ExternalLink href="https://github.com/NullVoxPopuli/replay-repeat" data-test-github>
               GitHub

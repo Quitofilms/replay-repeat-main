@@ -4,6 +4,23 @@
   padding: var(--padding-4);
 }
 
+.layout__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--gap-2);
+}
+
+.layout__title h1 {
+  margin: 0;
+}
+
+.layout__build {
+  color: color-mix(in oklab, var(--color-text) 65%, transparent);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .layout__header {
   display: flex;
   align-items: center;
