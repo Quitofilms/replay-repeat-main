@@ -22,8 +22,9 @@ export default defineConfig({
   base: process.env.VITE_BASE_PATH ?? "/",
   plugins: [ember(), Icons({ compiler: emberIcon })],
   build: {
-    outDir: "dist",
-    emptyOutDir: !handoutBuild,
+    outDir: process.env.VITE_OUT_DIR ?? "dist",
+    emptyOutDir: true,
+    assetsDir: handoutBuild ? "handout/assets" : "assets",
     rollupOptions: {
       input: handoutBuild ? "handout/index.html" : "index.html",
     },

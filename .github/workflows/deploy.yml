@@ -28,13 +28,20 @@ jobs:
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
           VITE_BASE_PATH: /replay-repeat-main/
+          VITE_OUT_DIR: dist-full
           VITE_BUILD_NUMBER: ${{ github.run_number }}
       - run: pnpm build
         env:
           VITE_HANDOUT: "true"
           VITE_BASE_PATH: /replay-repeat-main/
+          VITE_OUT_DIR: dist-lite
           VITE_ROOT_URL: /replay-repeat-main/handout/
           VITE_BUILD_NUMBER: ${{ github.run_number }}
+      - name: Combine Full and Lite files
+        run: |
+          mkdir -p dist
+          cp -R dist-full/. dist/
+          cp -R dist-lite/. dist/
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
