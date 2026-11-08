@@ -94,7 +94,7 @@ export class HandoutPage extends Component<Signature> {
       <div class="layout">
         <header class="layout__header">
           <div class="layout__title">
-            <h1>Replay, repeat</h1>
+            <h1>Replay, Repeat Lite</h1>
             <span class="layout__build">Version {{@buildVersion}}</span>
           </div>
         </header>

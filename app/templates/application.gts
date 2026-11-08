@@ -151,7 +151,7 @@ export default class Application extends Component {
         <div class="layout">
           <header class="layout__header">
             <div class="layout__title">
-              <h1>Replay, repeat</h1>
+              <h1>Replay, Repeat Full</h1>
               <span class="layout__build" title="Increasing GitHub Actions deployment number">
                 Version {{this.buildVersion}}
               </span>
